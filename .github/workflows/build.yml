@@ -19,7 +19,7 @@ jobs:
             flex \
             openssl \
             libssl-dev \
-            docker.io
+            docker.ce
 
       - name: Clone llama.cpp
         run: |
