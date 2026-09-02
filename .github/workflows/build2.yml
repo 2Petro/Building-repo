@@ -1,34 +1,28 @@
-name: Build llama.cpp Snapdragon Android 2
+name: Build llama.cpp Snapdragon Android
 
 on:
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    container:
-      image: ghcr.io/snapdragon-toolchain/arm64-android:v0.7
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          lfs: false
-
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
+            docker-ce \
             git \
             build-essential \
             bc \
             bison \
             flex \
             openssl \
-            libssl-dev \
-            docker.ce
+            libssl-dev
 
       - name: Clone llama.cpp
         run: |
@@ -41,11 +35,19 @@ jobs:
 
       - name: Package build
         run: |
-          cd llama.cpp
-          tar -czf ../llama-cpp-snapdragon-android.tar.gz pkg-adb/llama.cpp
+          tar -czf llama-cpp-snapdragon-android.tar.gz \
+            -C llama.cpp/pkg-adb llama.cpp
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v6
+      - name: Get version
+        id: version
+        run: |
+          echo "version=$(date -u +'%Y.%m.%d-%H%M')" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: llama-cpp-snapdragon-android
-          path: llama-cpp-snapdragon-android.tar.gz
+          tag_name: snapdragon-${{ steps.version.outputs.version }}
+          name: llama.cpp Snapdragon Android ${{ steps.version.outputs.version }}
+          generate_release_notes: true
+          files: |
+            llama-cpp-snapdragon-android.tar.gz
