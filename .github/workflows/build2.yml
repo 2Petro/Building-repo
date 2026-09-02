@@ -1,4 +1,4 @@
-name: Build llama.cpp Snapdragon Android
+name: Build llama.cpp Snapdragon Android 2
 
 on:
   workflow_dispatch:
